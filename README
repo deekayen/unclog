@@ -1,0 +1,40 @@
+I made unclog to clean worms out of my Apache logs.
+
+This script removes entries from Apache webserver logs
+coming from worms sitting on unpatched Windows systems with IIS.
+
+You can prevent further log entries from Code Red variants and
+w32nimdda by making the following additions to your httpd.conf
+
+ SetEnvIf Request_URI "default\.ida" dontlog
+ SetEnvIf Request_URI "cmd\.exe" dontlog
+ SetEnvIf Request_URI "root\.exe" dontlog
+
+Then edit your CustomLog directive
+
+ Customlog /usr/local/apache/bin/access_log common env=!dontlog
+
+Or since this is run from the prompt and not apache, you
+could set up a cron with this script
+
+Things to note:
+ - You must edit this script to tell it where the logs are
+ - This gets run from a command prompt, not Apache. That means
+   you might have to edit the very first line of this file to
+   point to the right place. If you only have PHP installed as
+   as server module, this script will not work.
+ - You should run this script as a user that has permission to
+   read access_log and permission to create a new file where the
+   new de-wormed log will be created
+ - You have to make it executable:
+     chmod a+rx logcleaner.sh.php
+
+Benchmarks:
+ I haven't done any, but for speed, you can rearange each of the
+ elements of the array to put the more popular stuff in the log
+ first which will speed this up. Sorting through 5000 entries
+ with 1700 legit entries took about 3 seconds on my Duron 800.
+
+To do:
+ - Add more worms (I have all I know of in this script).
+ - Maybe add commandline input instead of setting variables inline
